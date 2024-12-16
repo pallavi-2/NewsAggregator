@@ -11,5 +11,7 @@ namespace NewsAggregator.Models
         public string Description { get; set; }
         public string Url { get; set; }   
         public DateTime PublishedAt { get; set; }
+
+        public ICollection<SavedArticles> SavedArticles { get; set; }
     }
 }

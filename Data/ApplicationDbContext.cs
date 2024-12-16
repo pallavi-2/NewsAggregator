@@ -24,19 +24,24 @@ namespace NewsAggregator.Data
                 .WithMany()
                 .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-        
-            //modelBuilder.Entity<SavedArticles>()
-            //    .HasOne(a => a.User)
-            //    .WithMany()
-            //    .HasForeignKey(a=>a.User.Id)
-            //    .OnDelete(DeleteBehavior.Cascade);
 
-            //modelBuilder.Entity<SavedArticles>()
-            //    .HasOne(a => a.Articles)
-            //    .WithMany()
-            //    .HasForeignKey(a => a.ArticleId)
-            //    .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<SavedArticles>()
+                .HasKey(sa => new { sa.UserId, sa.ArticleId });
+
+            modelBuilder.Entity<SavedArticles>()
+                .HasOne(sa => sa.User) // One User
+                .WithMany(u => u.SavedArticles) // Many SavedArticles
+                .HasForeignKey(sa => sa.UserId) // Foreign key
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete on User deletion
+
+            modelBuilder.Entity<SavedArticles>()
+                .HasOne(sa => sa.Articles) // One Article
+                .WithMany(a => a.SavedArticles) // Many SavedArticles
+                .HasForeignKey(sa => sa.ArticleId) // Foreign key
+                .OnDelete(DeleteBehavior.Cascade);
         }
+
+
 
         
     }
