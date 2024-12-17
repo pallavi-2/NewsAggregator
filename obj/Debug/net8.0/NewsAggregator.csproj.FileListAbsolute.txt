@@ -170,3 +170,4 @@ D:\Programming\CSharp\NewsAggregator\NewsAggregator\obj\Debug\net8.0\ref\NewsAgg
 D:\Programming\CSharp\NewsAggregator\NewsAggregator\bin\Debug\net8.0\System.Net.Http.Formatting.dll
 D:\Programming\CSharp\NewsAggregator\NewsAggregator\bin\Debug\net8.0\Newtonsoft.Json.dll
 D:\Programming\CSharp\NewsAggregator\NewsAggregator\bin\Debug\net8.0\Newtonsoft.Json.Bson.dll
+D:\Programming\CSharp\NewsAggregator\NewsAggregator\obj\Debug\net8.0\NewsAggregator.sourcelink.json

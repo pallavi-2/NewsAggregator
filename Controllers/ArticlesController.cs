@@ -41,7 +41,7 @@ namespace NewsAggregator.Controllers
 
             //Get the interests of the user
             var interestName = await _context.Interests.FindAsync(int.Parse(userId));
-
+            
             // If no interest send all the available articles
                 string interests = interestName?.InterestName ?? "all" ;
 
@@ -52,6 +52,7 @@ namespace NewsAggregator.Controllers
                 foreach (string interest in AllInterest)
                 {
                     var result = await _newsService.GetNewsArticles(interest);
+                
 
                     if (result != null && result.Any())
                     {
@@ -139,12 +140,13 @@ namespace NewsAggregator.Controllers
             .ToListAsync();
             return Ok(articles);
         }
-        //[HttpGet]
-        //public async Task<IActionResult> NewsArticles([FromQuery] string category)
-        //{
-        //    var result = await _newsService.GetNewsArticles(category);
-        //    return Ok(result);
-        //}
+
+        [HttpGet("AllArticles")]
+        public async Task<IActionResult> NewsArticles([FromQuery] string category)
+        {
+            var result = await _newsService.GetNewsArticles(category);
+            return Ok(result);
+        }
 
     }
 }
