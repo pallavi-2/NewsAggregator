@@ -88,7 +88,10 @@ builder.Services.AddSwaggerGen(options =>
         });
 });
 
-
+builder.Logging.ClearProviders(); // Optional: Remove default providers
+builder.Logging.AddConsole(); // Log to the console
+builder.Logging.AddDebug();   // Log to Visual Studio Debug Output
+builder.Logging.AddEventLog(); // Optional: Log to Event Viewer (Windows)
 
 var app = builder.Build();
 
