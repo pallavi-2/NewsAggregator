@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace NewsAggregator.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateSavedArticlesTable : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,8 +15,7 @@ namespace NewsAggregator.Migrations
                 name: "UserArticles",
                 columns: table => new
                 {
-                    ArticleId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ArticleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Author = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -29,11 +28,48 @@ namespace NewsAggregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PasswordHash = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    PasswordSalt = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Interests",
+                columns: table => new
+                {
+                    InterestId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InterestName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Interests", x => x.InterestId);
+                    table.ForeignKey(
+                        name: "FK_Interests_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SavedArticles",
                 columns: table => new
                 {
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    ArticleId = table.Column<int>(type: "int", nullable: false),
+                    ArticleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     SavedId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -54,6 +90,11 @@ namespace NewsAggregator.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Interests_UserId",
+                table: "Interests",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SavedArticles_ArticleId",
                 table: "SavedArticles",
                 column: "ArticleId");
@@ -63,10 +104,16 @@ namespace NewsAggregator.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Interests");
+
+            migrationBuilder.DropTable(
                 name: "SavedArticles");
 
             migrationBuilder.DropTable(
                 name: "UserArticles");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

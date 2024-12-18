@@ -12,8 +12,8 @@ using NewsAggregator.Data;
 namespace NewsAggregator.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241216160404_CreateSavedArticlesTable")]
-    partial class CreateSavedArticlesTable
+    [Migration("20241217094516_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,8 +52,8 @@ namespace NewsAggregator.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ArticleId")
-                        .HasColumnType("int");
+                    b.Property<string>("ArticleId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("SavedId")
                         .HasColumnType("int");
@@ -100,11 +100,8 @@ namespace NewsAggregator.Migrations
 
             modelBuilder.Entity("NewsAggregator.Models.UserArticles", b =>
                 {
-                    b.Property<int>("ArticleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ArticleId"));
+                    b.Property<string>("ArticleId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Author")
                         .IsRequired()
