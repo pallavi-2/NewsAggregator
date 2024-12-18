@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using NewsAggregator.Data;
 using NewsAggregator.Dtos;
 using NewsAggregator.Interface;
-using NewsAggregator.Migrations;
 using NewsAggregator.Models;
 using System.Net.Http.Headers;
 using System.Security.Claims;
@@ -20,6 +19,7 @@ namespace NewsAggregator.Controllers
     {
         private readonly INewsService _newsService;
         private readonly ApplicationDbContext _context;
+
         public ArticlesController(INewsService newsService, ApplicationDbContext context)
         {
             _newsService = newsService;
@@ -41,53 +41,65 @@ namespace NewsAggregator.Controllers
 
             //Get the interests of the user
             var interestName = await _context.Interests.FindAsync(int.Parse(userId));
-            
-            // If no interest send all the available articles
-                string interests = interestName?.InterestName ?? "all" ;
 
-            //The interest are saved with spaces in the database
+            // If no interest send all the available articles
+                var interests = interestName?.InterestName;
+            if (string.IsNullOrEmpty(interests))
+            {
+                var result = await _newsService.GetNewsArticles("");
+                if (result != null && result.Any()) return Ok(result);
+            }
+            else
+            {
+                //The interest are saved with spaces in the database
                 string[] AllInterest = interests.Split(' ');
 
-            //Get the articles for each interest from api
+                //Get the articles for each interest from api
                 foreach (string interest in AllInterest)
                 {
                     var result = await _newsService.GetNewsArticles(interest);
-                
-
                     if (result != null && result.Any())
                     {
                         ArticleResponse.AddRange(result);
+
                     }
                 }
+            }
+            
             return ArticleResponse;
         }
 
 
         //Save the articles 
         [HttpPost("save")]
-        public async Task<IActionResult> SaveArticles([FromBody] string url)
+        public async Task<IActionResult> SaveArticles([FromBody] string id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
             {
                 return Unauthorized();
             }
-
+            
             //get all the articles from the api
-            var result = await _newsService.GetNewsArticles("all");
+            var result = await _newsService.GetNewsArticles("");
 
+            Console.WriteLine(id);
             foreach(var article in result)
             {
+                //Console.WriteLine(article);
                 //check if the url matches
-                if(article.Url == url)
+                if (article.ArticleId == id)
                 {
-                   //check if the article is already saves in the articles table
-                   var articleSaved = await _context.UserArticles.FirstOrDefaultAsync(x=>x.Url == url);
+                   //check if the article is already saved in the articles table
+                   var articleSaved = await _context.UserArticles.FirstOrDefaultAsync(x=>x.ArticleId == id);
+                    //Console.WriteLine(article.ArticleId);
                     //if not create a new article and save it
                     if(articleSaved == null)
                     {
+                        
                         articleSaved = new UserArticles
                         {
+                            ArticleId = id,
                             Title = article.Title,
                             Description = article.Description,
                             Url = article.Url,
@@ -98,7 +110,7 @@ namespace NewsAggregator.Controllers
                     }
 
                     //if the article is already present associate the article id and user id in the saved articles table
-                    int articleId = articleSaved.ArticleId;
+                    string articleId = articleSaved.ArticleId;
                     var connectArticleAndUser = new SavedArticles
                     {
                         ArticleId = articleId,
@@ -108,7 +120,7 @@ namespace NewsAggregator.Controllers
                 }
             }
             await _context.SaveChangesAsync();
-            return Ok("Article Saved");
+            return Ok("Article saved");
         }
 
 
@@ -124,7 +136,7 @@ namespace NewsAggregator.Controllers
             List<ArticleResponse> result = new List<ArticleResponse>();
 
             //Get all the article id associated with the user
-            List<int> articleId = await _context.SavedArticles
+            List<string> articleId = await _context.SavedArticles
             .Where(x => x.UserId == int.Parse(userId))
             .Select(x => x.ArticleId)
             .ToListAsync();
@@ -140,13 +152,5 @@ namespace NewsAggregator.Controllers
             .ToListAsync();
             return Ok(articles);
         }
-
-        [HttpGet("AllArticles")]
-        public async Task<IActionResult> NewsArticles([FromQuery] string category)
-        {
-            var result = await _newsService.GetNewsArticles(category);
-            return Ok(result);
-        }
-
     }
 }
